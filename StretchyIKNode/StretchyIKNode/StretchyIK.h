@@ -32,5 +32,6 @@ public:
 	static MTypeId typeID;
 	static void* creator();
 	static MStatus initialize();
+	// Use override as sanity check when overriding Maya's native compute method
 	MStatus compute(const MPlug& plug, MDataBlock& block) override;
 };
