@@ -141,6 +141,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="pluginMain.cpp" />
+    <ClCompile Include="StretchyIK.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="StretchyIK.h" />
