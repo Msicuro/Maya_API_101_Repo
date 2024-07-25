@@ -84,4 +84,92 @@ MStatus StretchyIK::initialize()
 
 	outLowerLengthAttr = numericFn.create("outLowerLength", "outLowerLength", MFnNumericData::kDouble, 0.0, &status); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = addAttribute(outLowerLengthAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+
+	// IK Chain Info
+	status = attributeAffects(inRootMatrixAttr, outUpperLengthAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(inRootMatrixAttr, outLowerLengthAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(inPoleVectorMatrixAttr, outUpperLengthAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(inPoleVectorMatrixAttr, outLowerLengthAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(inControlMatrixAttr, outUpperLengthAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(inControlMatrixAttr, outLowerLengthAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(inUpperLengthAttr, outUpperLengthAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(inUpperLengthAttr, outLowerLengthAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(inLowerLengthAttr, outUpperLengthAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(inLowerLengthAttr, outLowerLengthAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(inGlobalScaleAttr, outUpperLengthAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(inGlobalScaleAttr, outLowerLengthAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+
+	// Features
+	status = attributeAffects(inSlideAttr, outUpperLengthAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(inSlideAttr, outLowerLengthAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(inStretchAttr, outUpperLengthAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(inStretchAttr, outLowerLengthAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(inPoleVectorLockAttr, outUpperLengthAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(inPoleVectorLockAttr, outLowerLengthAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+
+	return status;
+}
+
+
+MStatus StretchyIK::compute(const MPlug& plug, MDataBlock& block)
+{
+	// Check if the plug is either of the two output attributes
+	if (plug != outUpperLengthAttr && plug != outLowerLengthAttr)
+	{
+		return MS::kInvalidParameter;
+	}
+
+	// Get the chain length
+	double upperLength = block.inputValue(inUpperLengthAttr).asDistance().asCentimeters();
+	double lowerLength = block.inputValue(inLowerLengthAttr).asDistance().asCentimeters();
+
+	// Compute the chain length
+	double chainLength = upperLength + lowerLength;
+
+	/// INPUT READING ///
+	// Get the positions of the incoming matrices
+	// Get the matrix
+	MMatrix rootM = block.inputValue(inRootMatrixAttr).asMatrix();
+	MMatrix poleVectorM = block.inputValue(inPoleVectorMatrixAttr).asMatrix();
+	MMatrix controlM = block.inputValue(inControlMatrixAttr).asMatrix();
+
+	// Get the world space translations from the matrix
+	MVector root(rootM[3]);
+	MVector poleVector(poleVectorM[3]);
+	MVector control(controlM[3]);
+	
+	// Factor in the Global Scale so all the math is in "pre-scale" space
+	// Make sure the scale is non 0 to avoid divide by 0 errors
+	double globalScale = block.inputValue(inGlobalScaleAttr).asDouble();
+	if (globalScale < 0.00001) { globalScale = 0.00001; }
+	
+	root /= globalScale;
+	poleVector /= globalScale;
+	control /= globalScale;
+
+	/// Slide ///
+	// Slide is implemented befroe the stretch to ensure the chain length does not change
+
+	// Make one bone closer to the full chain length, and the other bone closer to 0.0 using the lerp function
+	double slide = block.inputValue(inSlideAttr).asDouble();
+
+	// Limit the sliding values to avoid flipping
+	if (slide < -0.999) { slide = -0.999; }
+	if (slide > 0.999) { slide = 0.999; }
+
+	// Slide is between 1- and 1, if slide is less than 0, blend the upper bone towards 0
+	if (slide < 0.0)
+	{
+		upperLength = lerp(upperLength, 0.0, -slide);
+		lowerLength = lerp(lowerLength, chainLength, -slide);
+	}
+	// Slide is between 1- and 1, if slide is greater than 0, blend the lower bone towards 0
+	else
+	{
+		upperLength = lerp(upperLength, chainLength, slide);
+		lowerLength = lerp(lowerLength, 0.0, slide);
+	}
+
+
+	/// STRETCH
 }
