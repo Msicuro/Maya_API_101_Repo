@@ -172,4 +172,44 @@ MStatus StretchyIK::compute(const MPlug& plug, MDataBlock& block)
 
 
 	/// STRETCH
+	// If the ik handle passes a certain point, use the distance from the ik handle as the new chain length to stretch
+	MVector ikhDelta = control - root;
+	double desiredChainLength = ikhDelta.length();
+	double stretch = block.inputValue(inStretchAttr).asDouble();
+	double scaleFactor = 1.0;
+
+	if (desiredChainLength > chainLength)
+	{
+		scaleFactor = desiredChainLength / chainLength; // This value is greater than 1
+		// Interpolate from a scale of 1
+		scaleFactor = lerp(1.0, scaleFactor, stretch);
+		// Will be overridden if soft ik is triggered
+		upperLength *= scaleFactor;
+		lowerLength *= scaleFactor;
+	}
+
+
+	// POLE VECTOR LOCK
+	// Blend the joint lengths so the middle joint is exactly at the pole vector
+	double poleVectorLock = block.inputValue(inPoleVectorLockAttr).asDouble();
+
+	if (poleVectorLock > 0.0)
+	{
+		// The desired lengths are the distances between the points
+		double desiredUpperLength = (poleVector - root).length();
+		double desiredLowerLength = (control - poleVector).length();
+
+		// Use the pole vector lock value to blend from the original length to the new length
+		upperLength = lerp(upperLength, desiredUpperLength, poleVectorLock);
+		lowerLength = lerp(lowerLength, desiredLowerLength, poleVectorLock);
+	}
+
+
+	// SET OUTPUTS
+	block.outputValue(outUpperLengthAttr).setDouble(upperLength);
+	block.outputValue(outLowerLengthAttr).setDouble(lowerLength);
+	block.setClean(outUpperLengthAttr);
+	block.setClean(outLowerLengthAttr);
+
+	return MS::kSuccess;
 }
