@@ -46,8 +46,8 @@ MStatus StretchyIK::initialize()
 	inRootMatrixAttr = matFn.create("inRoot", "inRoot", MFnMatrixAttribute::kDouble, &status); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = addAttribute(inRootMatrixAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
 
-	inPoleVectorLockAttr = matFn.create("inPoleVector", "inPoleVector", MFnMatrixAttribute::kDouble, &status); CHECK_MSTATUS_AND_RETURN_IT(status);
-	status = addAttribute(inPoleVectorLockAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+	inPoleVectorMatrixAttr = matFn.create("inPoleVector", "inPoleVector", MFnMatrixAttribute::kDouble, &status); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = addAttribute(inPoleVectorMatrixAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
 
 	inControlMatrixAttr = matFn.create("inControl", "inControl", MFnMatrixAttribute::kDouble, &status); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = addAttribute(inControlMatrixAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
