@@ -13,7 +13,7 @@ double lerp(double a, double b, double t)
 	return a + (b - a) * t;
 }
 
-MTypeId StretchyIK::typeID = 0x80005;
+MTypeId StretchyIK::typeID(0x80005);
 
 // IK Chain Info
 MObject StretchyIK::inRootMatrixAttr;

@@ -116,7 +116,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Program Files\Autodesk\Maya2022\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Foundation.lib;OpenMaya.lib;%(AdditionalDependencies);Foundation.lib;OpenMaya.lib</AdditionalDependencies>
+      <AdditionalDependencies>Foundation.lib;OpenMaya.lib;%(AdditionalDependencies);Foundation.lib;OpenMaya.lib;Foundation.lib;OpenMaya.lib</AdditionalDependencies>
       <AdditionalOptions>/export:initializePlugin /export:uninitializePlugin %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
@@ -136,7 +136,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Program Files\Autodesk\Maya2022\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);Foundation.lib;OpenMaya.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);Foundation.lib;OpenMaya.lib;Foundation.lib;OpenMaya.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
