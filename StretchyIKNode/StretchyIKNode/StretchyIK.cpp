@@ -47,48 +47,81 @@ MStatus StretchyIK::initialize()
 
 	// IK Chain Info
 	inRootMatrixAttr = matFn.create("inRoot", "inRoot", MFnMatrixAttribute::kDouble, &status); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = matFn.setKeyable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = matFn.setWritable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = matFn.setStorable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = addAttribute(inRootMatrixAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
 
 	inPoleVectorMatrixAttr = matFn.create("inPoleVector", "inPoleVector", MFnMatrixAttribute::kDouble, &status); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = matFn.setKeyable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = matFn.setWritable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = matFn.setStorable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = addAttribute(inPoleVectorMatrixAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
 
 	inControlMatrixAttr = matFn.create("inControl", "inControl", MFnMatrixAttribute::kDouble, &status); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = matFn.setKeyable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = matFn.setWritable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = matFn.setStorable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = addAttribute(inControlMatrixAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
 
 	inUpperLengthAttr = unitFn.create("inUpperLength", "inUpperLength", MFnUnitAttribute::kDistance, 0.0, &status); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = unitFn.setMin(0.0); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = unitFn.setKeyable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = unitFn.setWritable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = unitFn.setStorable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = addAttribute(inUpperLengthAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
 
 	inLowerLengthAttr = unitFn.create("inLowerLength", "inLowerLength", MFnUnitAttribute::kDistance, 0.0, &status); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = unitFn.setMin(0.0); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = unitFn.setKeyable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = unitFn.setWritable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = unitFn.setStorable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = addAttribute(inLowerLengthAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
 
 	inGlobalScaleAttr = numericFn.create("inGlobalScale", "inGlobalScale", MFnNumericData::kDouble, 0.0, &status); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = numericFn.setMin(0.0); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = numericFn.setKeyable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = numericFn.setWritable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = numericFn.setStorable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = addAttribute(inGlobalScaleAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
 
 	inSlideAttr = numericFn.create("inSlide", "inSlide", MFnNumericData::kDouble, 0.0, &status); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = numericFn.setMin(-1.0); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = numericFn.setMax(1.0); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = numericFn.setKeyable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = numericFn.setWritable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = numericFn.setStorable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = addAttribute(inSlideAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
 
 	inStretchAttr = numericFn.create("inStretch", "inStretch", MFnNumericData::kDouble, 0.0, &status); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = numericFn.setMin(0.0); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = numericFn.setMax(1.0); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = numericFn.setKeyable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = numericFn.setWritable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = numericFn.setStorable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = addAttribute(inStretchAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
 
 	inPoleVectorLockAttr = numericFn.create("inPoleVectorLock", "inPoleVectorLock", MFnNumericData::kDouble, 0.0, &status); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = numericFn.setMin(0.0); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = numericFn.setMax(1.0); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = numericFn.setKeyable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = numericFn.setWritable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = numericFn.setStorable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = addAttribute(inPoleVectorLockAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
 
 	// Homework
 	inUpperScaleAttr = numericFn.create("inUpperScale", "inUpperScale", MFnNumericData::kDouble, 1.0, &status); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = numericFn.setMin(0.0); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = numericFn.setKeyable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = numericFn.setWritable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = numericFn.setStorable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = addAttribute(inUpperScaleAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
 
 	inLowerScaleAttr = numericFn.create("inLowerScale", "inLowerScale", MFnNumericData::kDouble, 1.0, &status); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = numericFn.setMin(0.0); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = numericFn.setKeyable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = numericFn.setWritable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = numericFn.setStorable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = addAttribute(inLowerScaleAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
 
 	// Outputs
