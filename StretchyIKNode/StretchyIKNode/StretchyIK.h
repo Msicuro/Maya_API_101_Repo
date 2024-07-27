@@ -19,6 +19,9 @@ public:
 	static MObject inUpperLengthAttr;
 	static MObject inLowerLengthAttr;
 	static MObject inGlobalScaleAttr;
+	// Homework
+	static MObject inUpperScaleAttr;
+	static MObject inLowerScaleAttr;
 
 	// Features
 	static MObject inSlideAttr;

@@ -22,6 +22,9 @@ MObject StretchyIK::inControlMatrixAttr;
 MObject StretchyIK::inUpperLengthAttr;
 MObject StretchyIK::inLowerLengthAttr;
 MObject StretchyIK::inGlobalScaleAttr;
+// Homework
+MObject StretchyIK::inUpperScaleAttr;
+MObject StretchyIK::inLowerScaleAttr;
 
 // Features
 MObject StretchyIK::inSlideAttr;
@@ -79,6 +82,16 @@ MStatus StretchyIK::initialize()
 	status = numericFn.setMax(1.0); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = addAttribute(inPoleVectorLockAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
 
+	// Homework
+	inUpperScaleAttr = numericFn.create("inUpperScale", "inUpperScale", MFnNumericData::kDouble, 1.0, &status); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = numericFn.setMin(0.0); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = addAttribute(inUpperScaleAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+
+	inLowerScaleAttr = numericFn.create("inLowerScale", "inLowerScale", MFnNumericData::kDouble, 1.0, &status); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = numericFn.setMin(0.0); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = addAttribute(inLowerScaleAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+
+	// Outputs
 	outUpperLengthAttr = numericFn.create("outUpperLength", "outUpperLength", MFnNumericData::kDouble, 0.0, &status); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = addAttribute(outUpperLengthAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
 
@@ -98,6 +111,11 @@ MStatus StretchyIK::initialize()
 	status = attributeAffects(inLowerLengthAttr, outLowerLengthAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = attributeAffects(inGlobalScaleAttr, outUpperLengthAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = attributeAffects(inGlobalScaleAttr, outLowerLengthAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+	// Homework
+	status = attributeAffects(inUpperScaleAttr, outUpperLengthAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(inUpperScaleAttr, outLowerLengthAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(inLowerScaleAttr, outUpperLengthAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(inLowerScaleAttr, outLowerLengthAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
 
 	// Features
 	status = attributeAffects(inSlideAttr, outUpperLengthAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
@@ -123,7 +141,18 @@ MStatus StretchyIK::compute(const MPlug& plug, MDataBlock& block)
 	double upperLength = block.inputValue(inUpperLengthAttr).asDistance().asCentimeters();
 	double lowerLength = block.inputValue(inLowerLengthAttr).asDistance().asCentimeters();
 
-	// Compute the chain length
+	// HOMEWORK - UPPER AND LOWER SCALE
+	// Reset the initial length with the upper and lower scale attributes
+	double upperScaleFactor = block.inputValue(inUpperScaleAttr).asDouble();
+	double lowerScaleFactor = block.inputValue(inLowerScaleAttr).asDouble();
+	// Prevent 0.0 length bones
+	if (upperScaleFactor < 0.0001) { upperScaleFactor = 0.0001; }
+	if (lowerScaleFactor < 0.0001) { lowerScaleFactor = 0.0001; }
+	// Multiply by the new scale factors
+	upperLength *= upperScaleFactor;
+	lowerLength *= lowerScaleFactor;
+
+	// Compute the full chain length
 	double chainLength = upperLength + lowerLength;
 
 	/// INPUT READING ///
@@ -148,7 +177,7 @@ MStatus StretchyIK::compute(const MPlug& plug, MDataBlock& block)
 	control /= globalScale;
 
 	/// Slide ///
-	// Slide is implemented befroe the stretch to ensure the chain length does not change
+	// Slide is implemented before the stretch to ensure the chain length does not change
 
 	// Make one bone closer to the full chain length, and the other bone closer to 0.0 using the lerp function
 	double slide = block.inputValue(inSlideAttr).asDouble();
