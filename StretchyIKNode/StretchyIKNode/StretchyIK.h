@@ -28,9 +28,14 @@ public:
 	static MObject inStretchAttr;
 	static MObject inPoleVectorLockAttr;
 
+	// Soft IK
+	static MObject inSoftIKDistanceAttr;
+	static MObject outIKHandlePosAttr;
+
 	// Outputs
 	static MObject outUpperLengthAttr;
 	static MObject outLowerLengthAttr;
+	
 
 	static MTypeId typeID;
 	static void* creator();

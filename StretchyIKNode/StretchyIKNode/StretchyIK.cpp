@@ -31,6 +31,10 @@ MObject StretchyIK::inSlideAttr;
 MObject StretchyIK::inStretchAttr;
 MObject StretchyIK::inPoleVectorLockAttr;
 
+// Soft IK
+MObject StretchyIK::inSoftIKDistanceAttr;
+MObject StretchyIK::outIKHandlePosAttr;
+
 // Outputs
 MObject StretchyIK::outUpperLengthAttr;
 MObject StretchyIK::outLowerLengthAttr;
@@ -124,6 +128,14 @@ MStatus StretchyIK::initialize()
 	status = numericFn.setStorable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = addAttribute(inLowerScaleAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
 
+	// Soft IK
+	inSoftIKDistanceAttr = numericFn.create("inSoftIKDistance", "inSoftIKDistance", MFnNumericData::kDouble, 0.0, &status); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = numericFn.setMin(0.0); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = addAttribute(inSoftIKDistanceAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+	// Note that createPoint creates an MFloatVector for the ik position
+	outIKHandlePosAttr = numericFn.createPoint("outIKHandlePos", "outIKHandlePos", &status); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = addAttribute(outIKHandlePosAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+
 	// Outputs
 	outUpperLengthAttr = numericFn.create("outUpperLength", "outUpperLength", MFnNumericData::kDouble, 0.0, &status); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = addAttribute(outUpperLengthAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
@@ -157,6 +169,23 @@ MStatus StretchyIK::initialize()
 	status = attributeAffects(inStretchAttr, outLowerLengthAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = attributeAffects(inPoleVectorLockAttr, outUpperLengthAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = attributeAffects(inPoleVectorLockAttr, outLowerLengthAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+
+	// Soft IK
+	status = attributeAffects(inSoftIKDistanceAttr, outUpperLengthAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(inSoftIKDistanceAttr, outLowerLengthAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+	// All input attributes need to affect all outputs, including for soft ik
+	status = attributeAffects(inRootMatrixAttr, outIKHandlePosAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(inPoleVectorMatrixAttr, outIKHandlePosAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(inControlMatrixAttr, outIKHandlePosAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(inUpperLengthAttr, outIKHandlePosAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(inLowerLengthAttr, outIKHandlePosAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(inGlobalScaleAttr, outIKHandlePosAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(inUpperScaleAttr, outIKHandlePosAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(inLowerScaleAttr, outIKHandlePosAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(inSlideAttr, outIKHandlePosAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(inStretchAttr, outIKHandlePosAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(inPoleVectorLockAttr, outIKHandlePosAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(inSoftIKDistanceAttr, outIKHandlePosAttr); CHECK_MSTATUS_AND_RETURN_IT(status);
 
 	return status;
 }
@@ -249,6 +278,37 @@ MStatus StretchyIK::compute(const MPlug& plug, MDataBlock& block)
 		upperLength *= scaleFactor;
 		lowerLength *= scaleFactor;
 	}
+
+
+	// Soft IK
+	double softIKDistance = block.inputValue(inSoftIKDistanceAttr).asDouble();
+	// Get the current length of the chain
+	double stretchedChainLength = chainLength * scaleFactor;
+	// Get the linear part of the transition
+	double stretchedHardChainLength = stretchedChainLength - softIKDistance;
+	// If Soft IK is on and the chain stretches past the linear/hard chain length....
+	if (softIKDistance > 0.0 && desiredChainLength > stretchedHardChainLength)
+	{
+		// Use the original chain length to get a transition buffer before the stretch (the first linear part of the graph)
+		double hardChainLength = chainLength - softIKDistance;
+		// Isolate the amount of softening (the second part of the graph)
+		double softlength = desiredChainLength - hardChainLength;
+		// Normalize the softLength with the softIKDistance so that the curve is the same regardless of joint length or softIKDistance
+		double parameter = softlength / softIKDistance;
+		// Get the exponential value (2.71828^p) of parameter to remap and soften the curve
+		parameter = exp(-parameter);
+		// Scale it back and get the resulting IK Handle position
+		double ikOffset = chainLength - softIKDistance * parameter;
+		// Take the stretch into account
+		ikOffset *= scaleFactor;
+		// Reposition the ik handle relative to the root; Since ik offset is a distance, the direction is normalized
+		ikhDelta *= ikOffset / desiredChainLength; // Alternative to ikhDelta = ikhDelta.normal() * ikOffset;
+	}
+	// Apply the global scale when reconstructing the ik handle position
+	MFloatVector outIKHandlePos = (root + ikhDelta) * globalScale;
+	// Output the ik handle position
+	block.outputValue(outIKHandlePosAttr).setMFloatVector(outIKHandlePos);
+	block.setClean(outIKHandlePosAttr);
 
 
 	// POLE VECTOR LOCK
