@@ -19,10 +19,28 @@
 class AimNode : public MPxNode
 {
 public:
+	// General Node Setup
 	static MTypeId typeID;
 	static void* creator();
 	static MStatus initialize();
 	// Use override as sanity check when overriding Maya's native compute method
 	MStatus compute(const MPlug& plug, MDataBlock& block) override;
 
+	// Input Translates for driven object
+	static MObject inputTranslateX;
+	static MObject inputTranslateY;
+	static MObject inputTranslateZ;
+	static MObject inputTranslates;
+
+	// Output Rotates for driven object
+	static MObject outputRotateX;
+	static MObject outputRotateY;
+	static MObject outputRotateZ;
+	static MObject outputRotates;
+
+	// Input matrix for the driver of the constraint
+	static MObject inputDriverMatrix;
+
+	// Input matrix for the up vector of the constraint
+	static MObject inputUpVectorMatrix;
 };
