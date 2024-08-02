@@ -87,7 +87,7 @@ MStatus AimNode::initialize()
 }
 
 
-MStatus AimNode::compute(const MPlug& plug, MDataBlock& block)
+MStatus AimNode::compute(const MPlug& plug, MDataBlock& data)
 {
 	if (plug != outputRotates && plug != outputRotateX
 		&& plug != outputRotateY && plug != outputRotateZ)
@@ -95,7 +95,43 @@ MStatus AimNode::compute(const MPlug& plug, MDataBlock& block)
 		return MS::kInvalidParameter;
 	}
 
+	// Extract input data
+	MMatrix driverMatrix = data.inputValue(inputDriverMatrix).asMatrix();
+	MMatrix upVectorMatrix = data.inputValue(inputUpVectorMatrix).asMatrix();
+	MVector translateVector = data.inputValue(inputTranslates).asVector();
 
-	
+	// Extract the positions from the matrices
+	MVector driverMatrixPos = { driverMatrix[3][0], driverMatrix[3][1], driverMatrix[3][2] };
+	MVector upVectorMatrixPos = { upVectorMatrix[3][0], upVectorMatrix[3][1], upVectorMatrix[3][2] };
+
+	// Compute the vectors from the driven object
+	MVector upVector = upVectorMatrixPos - translateVector;
+	MVector driverVector = driverMatrixPos - translateVector;
+
+	// Normalize the vectors
+	MVector upVectorNorm = upVector.normal();
+	MVector driverVectorNorm = driverVector.normal();
+
+	// Compute a perpendicular vector to the upVector and Driver positions
+	MVector cross = driverVectorNorm ^ upVectorNorm;
+	MVector finalUpVector = cross ^ driverVectorNorm;
+
+	// Create a rotational Matrix
+	double newMatrix[4][4] = {
+		{driverVectorNorm.x, driverVectorNorm.y, driverVectorNorm.z, 0.0},
+		{finalUpVector.x, finalUpVector.y, finalUpVector.z, 0.0},
+		{cross.x, cross.y, cross.z, 0.0},
+		{translateVector.x, translateVector.y, translateVector.z, 0.0}
+	};
+
+	// Extract Euler rotations
+	MMatrix rotMatrix(newMatrix);
+	MTransformationMatrix matrixFn(rotMatrix);
+	MEulerRotation euler = matrixFn.eulerRotation();
+
+	// Set and clean output data
+	data.outputValue(outputRotates).set(euler.x, euler.y, euler.z);
+	data.outputValue(outputRotates).setClean();
+
 	return MS::kSuccess;
 }
