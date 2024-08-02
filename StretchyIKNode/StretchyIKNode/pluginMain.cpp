@@ -5,7 +5,7 @@ MStatus initializePlugin(MObject plugin)
 {
 	MStatus stat;
 	MFnPlugin fnPlugin(plugin, "Mattia Sicuro", "1.0", "Any", &stat); CHECK_MSTATUS_AND_RETURN_IT(stat);
-	CHECK_MSTATUS_AND_RETURN_IT(fnPlugin.registerNode("Stretchy IK", StretchyIK::typeID, StretchyIK::creator, StretchyIK::initialize));
+	CHECK_MSTATUS_AND_RETURN_IT(fnPlugin.registerNode("StretchyIK", StretchyIK::typeID, StretchyIK::creator, StretchyIK::initialize));
 	return MS::kSuccess;
 }
 
