@@ -50,4 +50,7 @@ public:
 	static MObject aimVectorX;
 	static MObject aimVectorY;
 	static MObject aimVectorZ;
+
+	// Function to change order of Matrix array
+	static void changeOrder(double array[], int a, int b, int c);
 };

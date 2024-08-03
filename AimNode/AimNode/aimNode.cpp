@@ -21,6 +21,17 @@ MObject AimNode::aimVectorX;
 MObject AimNode::aimVectorY;
 MObject AimNode::aimVectorZ;
 
+void AimNode::changeOrder(double array[], int a, int b, int c)
+{
+	/*
+	* Change the order of an array
+	*/
+	double temp = array[c];
+	array[c] = array[b];
+	array[b] = array[a];
+	array[a] = temp;
+}
+
 void* AimNode::creator() { return new AimNode; }
 
 MStatus AimNode::initialize()
