@@ -21,15 +21,14 @@ MObject AimNode::aimVectorX;
 MObject AimNode::aimVectorY;
 MObject AimNode::aimVectorZ;
 
-void AimNode::changeOrder(double array[], int a, int b, int c)
+void AimNode::swap(double array[], int swapValue, int targetIndex)
 {
 	/*
-	* Change the order of an array
+	* Exchange two values of an array with each other
 	*/
-	double temp = array[c];
-	array[c] = array[b];
-	array[b] = array[a];
-	array[a] = temp;
+	double temp = array[targetIndex];
+	array[targetIndex] = array[swapValue];
+	array[swapValue] = temp;
 }
 
 void* AimNode::creator() { return new AimNode; }

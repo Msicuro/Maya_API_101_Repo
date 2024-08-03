@@ -52,5 +52,5 @@ public:
 	static MObject aimVectorZ;
 
 	// Function to change order of Matrix array
-	static void changeOrder(double array[], int a, int b, int c);
+	static void swap(double array[], int swapValue, int targetIndex);
 };
