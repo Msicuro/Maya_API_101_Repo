@@ -15,6 +15,11 @@ MObject AimNode::outputRotateZ;
 MObject AimNode::outputRotates;
 MObject AimNode::inputDriverMatrix;
 MObject AimNode::inputUpVectorMatrix;
+// Enum Attributes
+MObject AimNode::aimVector;
+MObject AimNode::aimVectorX;
+MObject AimNode::aimVectorY;
+MObject AimNode::aimVectorZ;
 
 void* AimNode::creator() { return new AimNode; }
 
@@ -26,6 +31,7 @@ MStatus AimNode::initialize()
 	MFnNumericAttribute numericFn;
 	MFnTypedAttribute typedFn;
 	MFnCompoundAttribute compFn;
+	MFnEnumAttribute enumFn;
 
 	// Create the driver matrix attribute
 	inputDriverMatrix = matFn.create("driverMatrix", "driverMatrix", MFnMatrixAttribute::kDouble, &status); CHECK_MSTATUS_AND_RETURN_IT(status);
@@ -63,6 +69,13 @@ MStatus AimNode::initialize()
 	status = compFn.setStorable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = addAttribute(inputTranslates); CHECK_MSTATUS_AND_RETURN_IT(status);
 
+	// Enum attribute to determine final aim vector
+	aimVector = enumFn.create("aimVector", "aimVector", 0, &status); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = enumFn.addField("X", 0); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = enumFn.addField("Y", 1); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = enumFn.addField("Z", 2); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = addAttribute(aimVector); CHECK_MSTATUS_AND_RETURN_IT(status);
+
 	// Create the driver output rotation attributes
 	outputRotateX = unitFn.create("rotateX", "rotateX", MFnUnitAttribute::kAngle, &status); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = addAttribute(outputRotateX); CHECK_MSTATUS_AND_RETURN_IT(status);
@@ -82,6 +95,7 @@ MStatus AimNode::initialize()
 	status = attributeAffects(inputDriverMatrix, outputRotates); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = attributeAffects(inputUpVectorMatrix, outputRotates); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = attributeAffects(inputTranslates, outputRotates); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(aimVector, outputRotates); CHECK_MSTATUS_AND_RETURN_IT(status);
 
 	return status;
 }

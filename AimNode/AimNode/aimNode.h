@@ -15,6 +15,7 @@
 #include <maya/MDistance.h>
 #include <maya/MMatrix.h>
 #include <maya/MVector.h>
+#include <maya/MFnEnumAttribute.h>
 
 class AimNode : public MPxNode
 {
@@ -43,4 +44,10 @@ public:
 
 	// Input matrix for the up vector of the constraint
 	static MObject inputUpVectorMatrix;
+
+	// Driven object aim vector to be chosen from an enum
+	static MObject aimVector;
+	static MObject aimVectorX;
+	static MObject aimVectorY;
+	static MObject aimVectorZ;
 };
