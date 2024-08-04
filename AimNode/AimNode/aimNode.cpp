@@ -21,14 +21,20 @@ MObject AimNode::aimVectorX;
 MObject AimNode::aimVectorY;
 MObject AimNode::aimVectorZ;
 
-void AimNode::swap(double array[], int swapValue, int targetIndex)
+
+void AimNode::swap(double array[4][4], int swapIndex, int targetIndex)
 {
 	/*
-	* Exchange two values of an array with each other
+	* Exchange the elements between two rows of an array
 	*/
-	double temp = array[targetIndex];
-	array[targetIndex] = array[swapValue];
-	array[swapValue] = temp;
+
+	// Iterate through the rows and replace each element
+	for (int i = 0; i < 4; i++)
+	{
+		double temp = array[targetIndex][i];
+		array[targetIndex][i] = array[swapIndex][i];
+		array[swapIndex][i] = temp;
+	}
 }
 
 void* AimNode::creator() { return new AimNode; }
@@ -147,6 +153,15 @@ MStatus AimNode::compute(const MPlug& plug, MDataBlock& data)
 		{cross.x, cross.y, cross.z, 0.0},
 		{translateVector.x, translateVector.y, translateVector.z, 0.0}
 	};
+
+	// Apply aim vector selection to newMatrix
+	int aimSelection = data.inputValue(aimVector).asShort();
+	
+	if (aimSelection != 0)
+	{
+		swap(newMatrix, aimSelection, 0);
+	};
+
 
 	// Extract Euler rotations
 	MMatrix rotMatrix(newMatrix);

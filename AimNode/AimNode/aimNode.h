@@ -16,6 +16,7 @@
 #include <maya/MMatrix.h>
 #include <maya/MVector.h>
 #include <maya/MFnEnumAttribute.h>
+#include <vector>
 
 class AimNode : public MPxNode
 {
@@ -51,6 +52,6 @@ public:
 	static MObject aimVectorY;
 	static MObject aimVectorZ;
 
-	// Function to change order of Matrix array
-	static void swap(double array[], int swapValue, int targetIndex);
+	// Function to change the order of a Matrix array
+	static void swap(double array[4][4], int swapIndex, int targetIndex);
 };
