@@ -20,6 +20,10 @@ MObject AimNode::aimVector;
 MObject AimNode::aimVectorX;
 MObject AimNode::aimVectorY;
 MObject AimNode::aimVectorZ;
+MObject AimNode::upVectorSel;
+MObject AimNode::upVectorSelX;
+MObject AimNode::upVectorSelY;
+MObject AimNode::upVectorSelZ;
 
 
 void AimNode::swap(double array[4][4], int swapIndex, int targetIndex)
@@ -92,6 +96,13 @@ MStatus AimNode::initialize()
 	status = enumFn.addField("Z", 2); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = addAttribute(aimVector); CHECK_MSTATUS_AND_RETURN_IT(status);
 
+	// Enum attribute to determine final up vector
+	upVectorSel = enumFn.create("upVector", "upVector", 0, &status); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = enumFn.addField("X", 0); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = enumFn.addField("Y", 1); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = enumFn.addField("Z", 2); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = addAttribute(upVectorSel); CHECK_MSTATUS_AND_RETURN_IT(status);
+
 	// Create the driver output rotation attributes
 	outputRotateX = unitFn.create("rotateX", "rotateX", MFnUnitAttribute::kAngle, &status); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = addAttribute(outputRotateX); CHECK_MSTATUS_AND_RETURN_IT(status);
@@ -112,6 +123,7 @@ MStatus AimNode::initialize()
 	status = attributeAffects(inputUpVectorMatrix, outputRotates); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = attributeAffects(inputTranslates, outputRotates); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = attributeAffects(aimVector, outputRotates); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(upVectorSel, outputRotates); CHECK_MSTATUS_AND_RETURN_IT(status);
 
 	return status;
 }
@@ -160,7 +172,15 @@ MStatus AimNode::compute(const MPlug& plug, MDataBlock& data)
 	if (aimSelection != 0)
 	{
 		swap(newMatrix, aimSelection, 0);
-	};
+	}
+
+	// Apply up vector selection to newMatrix
+	int upSelection = data.inputValue(upVectorSel).asShort();
+
+	if (upSelection != aimSelection)
+	{
+		swap(newMatrix, upSelection, 1);
+	}
 
 
 	// Extract Euler rotations

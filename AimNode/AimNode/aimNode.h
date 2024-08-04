@@ -52,6 +52,12 @@ public:
 	static MObject aimVectorY;
 	static MObject aimVectorZ;
 
+	// Driven object up vector to be chosen from an enum
+	static MObject upVectorSel;
+	static MObject upVectorSelX;
+	static MObject upVectorSelY;
+	static MObject upVectorSelZ;
+
 	// Function to change the order of a Matrix array
 	static void swap(double array[4][4], int swapIndex, int targetIndex);
 };
