@@ -2,6 +2,7 @@
 #include "locatorNodeVP1.h"
 
 MTypeId LocatorNodeVP1::typeID(0x90006);
+MObject LocatorNodeVP1::drawIt;
 
 void* LocatorNodeVP1::creator(){ return new LocatorNodeVP1; }
 
@@ -11,7 +12,6 @@ MBoundingBox LocatorNodeVP1::boundingBox() const
 {
 	return MBoundingBox(MPoint(-2.0, -1.5, 0.0), MPoint(3.0, 1.5, 0.0));
 }
-
 
 MStatus LocatorNodeVP1::initialize()
 {
