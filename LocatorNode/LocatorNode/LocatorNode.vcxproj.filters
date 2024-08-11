@@ -21,9 +21,15 @@
     <ClCompile Include="locatorNodeVP1.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="locatorNodeVP12.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="locatorNodeVP1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="locatorNodeVP12.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
