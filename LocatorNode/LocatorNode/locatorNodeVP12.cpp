@@ -112,11 +112,13 @@ void LocatorNodeVP12Override::addUIDrawables(const MDagPath& dagPath, MHWRender:
 	indices.append(4); indices.append(5); indices.append(6);
 
 	drawManager.beginDrawable();
-	MHWRender::DisplayStatus displayStatus = MHWRender::MGeometryUtilities::displayStatus(dagPath);
-	MColor color;
 
-	if (displayStatus = MHWRender::DisplayStatus::kLead) { color = MColor(0.0f, 1.0f, 0.0f, 0.3f); }
-	else { color = MColor(1.0f, 0.0f, 0.0f, 0.3f); }
+	//MHWRender::DisplayStatus displayStatus = MHWRender::MGeometryUtilities::displayStatus(dagPath);
+	//MColor color;
+	MColor color = MHWRender::MGeometryUtilities::wireframeColor(dagPath);
+
+	/*if (displayStatus = MHWRender::DisplayStatus::kLead) { color = MColor(0.0f, 1.0f, 0.0f, 0.3f); }
+	else { color = MColor(1.0f, 0.0f, 0.0f, 0.3f); }*/
 
 	if (frameContext.getDisplayStyle() == MHWRender::MFrameContext::kFlatShaded
 		|| frameContext.getDisplayStyle() == MHWRender::MFrameContext::kGouraudShaded
