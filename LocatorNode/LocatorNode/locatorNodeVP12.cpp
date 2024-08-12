@@ -22,6 +22,9 @@ MStatus LocatorNodeVP12::initialize()
 
 	MFnNumericAttribute numericFn;
 	drawIt = numericFn.create("drawIt", "drawIt", MFnNumericData::kBoolean, 1.0, &status); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = numericFn.setKeyable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = numericFn.setWritable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = numericFn.setStorable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = addAttribute(drawIt); CHECK_MSTATUS_AND_RETURN_IT(status);
 
 	return status;
