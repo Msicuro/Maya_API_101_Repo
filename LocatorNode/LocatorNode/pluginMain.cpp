@@ -26,6 +26,6 @@ MStatus uninitializePlugin(MObject pluginObject)
 	MFnPlugin fnPlugin(pluginObject);
 	CHECK_MSTATUS_AND_RETURN_IT(fnPlugin.deregisterNode(LocatorNodeVP1::typeID));
 	CHECK_MSTATUS_AND_RETURN_IT(fnPlugin.deregisterNode(LocatorNodeVP12::typeID));
-	CHECK_MSTATUS_AND_RETURN_IT(MHWRender::MDrawRegistry::deregisterDrawOverrideCreator(LocatorNodeVP12::drawDbClassification), "LocatorNodeVP12");
+	CHECK_MSTATUS_AND_RETURN_IT(MHWRender::MDrawRegistry::deregisterDrawOverrideCreator(LocatorNodeVP12::drawDbClassification, "LocatorNodeVP12"));
 	return MS::kSuccess;
 }

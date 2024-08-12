@@ -23,7 +23,7 @@ public:
 
 };
 
-class LocatorNodeV12Override : public MHWRender::MPxDrawOverride
+class LocatorNodeVP12Override : public MHWRender::MPxDrawOverride
 {
 public:
 	static MHWRender::MPxDrawOverride* creator(const MObject& obj);
@@ -34,7 +34,7 @@ public:
 	static void draw(const MHWRender::MDrawContext& context, const MUserData* userData);
 
 private:
-	LocatorNodeV12Override(const MObject& obj);
+	LocatorNodeVP12Override(const MObject& obj);
 
 	class UserData : public MUserData
 	{

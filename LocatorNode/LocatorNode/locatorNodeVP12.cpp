@@ -48,7 +48,7 @@ void LocatorNodeVP12::draw(M3dView& view, const MDagPath& path, M3dView::Display
 	glBegin(GL_TRIANGLES); // Draw triangles
 	glVertex3d(-2.0, 1.0, 0.0); // First triangle
 	glVertex3d(-2.0, -1.0, 0.0);
-	glVertex3d(2.0, -1.0, 0.0);
+	glVertex3d(2.0, 1.0, 0.0);
 
 	glVertex3d(2.0, 1.0, 0.0); // Second triangle
 	glVertex3d(-2.0, -1.0, 0.0);
@@ -70,16 +70,16 @@ MObject LocatorNodeVP12::drawIt;
 MString LocatorNodeVP12::drawDbClassification = "drawdb/geometry/LocatorNodeVP12";
 
 // Create the node overrides constructor, which defers to the MPxDrawOverride constructor and provides an empty "draw" Function
-LocatorNodeV12Override::LocatorNodeV12Override(const MObject& obj) : MHWRender::MPxDrawOverride(obj, LocatorNodeV12Override::draw) { }
+LocatorNodeVP12Override::LocatorNodeVP12Override(const MObject& obj) : MHWRender::MPxDrawOverride(obj, LocatorNodeVP12Override::draw) { }
 
-void LocatorNodeV12Override::draw(const MHWRender::MDrawContext& context, const MUserData* userData) { }
+void LocatorNodeVP12Override::draw(const MHWRender::MDrawContext& context, const MUserData* userData) { }
 
-MHWRender::MPxDrawOverride* LocatorNodeV12Override::creator(const MObject& obj) { return new LocatorNodeV12Override(obj); }
+MHWRender::MPxDrawOverride* LocatorNodeVP12Override::creator(const MObject& obj) { return new LocatorNodeVP12Override(obj); }
 
-MHWRender::DrawAPI LocatorNodeV12Override::supportedDrawAPIs() const { return MHWRender::kAllDevices; }
-bool LocatorNodeV12Override::hasUIDrawables() const { return true; }
+MHWRender::DrawAPI LocatorNodeVP12Override::supportedDrawAPIs() const { return MHWRender::kAllDevices; }
+bool LocatorNodeVP12Override::hasUIDrawables() const { return true; }
 
-MUserData* LocatorNodeV12Override::prepareForDraw(const MDagPath& objPath, const MDagPath& cameraPath, const MHWRender::MFrameContext& frameContext, MUserData* userData)
+MUserData* LocatorNodeVP12Override::prepareForDraw(const MDagPath& objPath, const MDagPath& cameraPath, const MHWRender::MFrameContext& frameContext, MUserData* userData)
 {
 	// Check if there's an instance of our class
 	UserData* castData = dynamic_cast<UserData*>(userData);
@@ -92,7 +92,7 @@ MUserData* LocatorNodeV12Override::prepareForDraw(const MDagPath& objPath, const
 	return castData;
 }
 
-void LocatorNodeV12Override::addUIDrawables(const MDagPath& dagPath, MHWRender::MUIDrawManager& drawManager, const MHWRender::MFrameContext& frameContext, const MUserData* userData)
+void LocatorNodeVP12Override::addUIDrawables(const MDagPath& dagPath, MHWRender::MUIDrawManager& drawManager, const MHWRender::MFrameContext& frameContext, const MUserData* userData)
 {
 	const UserData* castData = dynamic_cast<const UserData*>(userData);
 	if (castData == nullptr) { return; }
