@@ -179,7 +179,14 @@ MStatus AimNode::compute(const MPlug& plug, MDataBlock& data)
 
 	if (upSelection != aimSelection)
 	{
-		swap(newMatrix, upSelection, 1);
+		if (aimSelection == 1)
+		{
+			swap(newMatrix, upSelection, 0);
+		}
+		else
+		{
+			swap(newMatrix, upSelection, 1);
+		}
 	}
 
 
