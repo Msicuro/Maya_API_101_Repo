@@ -11,8 +11,9 @@
 
 class SnapDeformer : public MPxDeformerNode
 {
+	// Methods
 public:
-	// General Node setup (methods)
+	// General Node setup
 	static void* creator();
 	static MStatus initialize();
 
@@ -27,10 +28,12 @@ private:
 	void initData(MObject& driverMesh, MPointArray& deformedPoints, MIntArray& bindArray, MObject& attribute);
 	void ensureIndexes(MObject& attribute, int indexSize);
 
+	// Variables
 public:
-	// General Node setup (variables)
+	// General Node setup
 	static MTypeId typeId;
 
+	// Node attributes
 	static MObject referenceMesh;
 	static MObject rebind;
 	static MObject driverMesh;
