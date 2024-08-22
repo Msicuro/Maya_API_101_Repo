@@ -1,3 +1,5 @@
+#pragma once
+
 #include "snapDeformer.h"
 #include <maya/MItGeometry.h>
 #include <maya/MItMeshVertex.h>
@@ -6,6 +8,14 @@
 #include <maya/MFnMesh.h>
 #include <maya/MItMeshPolygon.h>
 #include <maya/MPlug.h>
+
+// Assumed these weren't necessary since they're in the Header file but added for debugging
+#include <maya/MPxDeformerNode.h>
+#include <maya/MFnNumericAttribute.h>
+#include <maya/MPoint.h>
+#include <maya/MVector.h>
+#include <maya/MPointArray.h>
+#include <maya/MMatrix.h>
 
 // Define constants
 #define SMALL (float)1e-6
@@ -163,7 +173,72 @@ MStatus SnapDeformer::deform(MDataBlock& data, MItGeometry& iter, const MMatrix&
 
 void SnapDeformer::initData(MObject& driverMesh, MPointArray& deformedPoints, MIntArray& bindArray, MObject& attribute)
 {
-	// Left off at 18:45 in week5_pt4 video
+	// Get the amount of points on the mesh and set the array size
+	int count = deformedPoints.length();
+	bindArray.setLength(count);
+
+	// Declare the function sets and store the points in driverPoints
+	MFnMesh meshFn(driverMesh);
+	MItMeshPolygon faceIter(driverMesh);
+	MPointArray driverPoints;
+	meshFn.getPoints(driverPoints, MSpace::kWorld);
+
+	// Declare variables ahead of the for loop
+	MPlug attrPlug(thisMObject(), attribute);
+	MDataHandle handle;
+
+	MPoint closest;
+	int closestFace, oldIndex, minId;
+	unsigned int v;
+	MIntArray vertices;
+	double minDistance, distance;
+	MVector base, end, vector;
+
+	// Iterate through the points on the deformer mesh
+	for (int i = 0; i < count; i++)
+	{
+		// Get the closest face
+		meshFn.getClosestPoint(deformedPoints[i], closest, MSpace::kWorld, &closestFace);
+
+		// Find the closest vertex
+		faceIter.setIndex(closestFace, oldIndex);
+		vertices.setLength(0);
+		faceIter.getVertices(vertices);
+
+		// Convert the MPoint to an MVector
+		base = MVector(closest);
+		minDistance = BIG_DIST;
+
+		// Loop through all the faces
+		for (v = 0; v < vertices.length(); v++)
+		{
+			// Get the end of the vector
+			end = MVector(driverPoints[vertices[v]]);
+			// Build the vector
+			vector = end - base;
+			// Get the vector length
+			distance = vector.length();
+			
+			// Check if the distance is the shortest
+			if (distance < minDistance)
+			{
+				minDistance = distance;
+				minId = vertices[v];
+			}
+		}
+
+		// Store the results both in the array and in the attribute
+		bindArray[i] = int(minId);
+
+		// Ensure we have the attribute indexes
+		attrPlug.selectAncestorLogicalIndex(i, attribute);
+		attrPlug.getValue(handle);
+		attrPlug.setValue(minId);
+	}
+
+	// Set controller variable
+	initialized = 1;
+	elemCount = count;
 }
 
 MStatus SnapDeformer::shouldSave(const MPlug& plug, bool& result)
