@@ -140,6 +140,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="pluginMain.cpp" />
+    <ClCompile Include="stressMap.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stressMap.h" />

@@ -15,15 +15,15 @@ MStatus initializePlugin(MObject obj)
 {
 	MStatus status;
 	MFnPlugin fnPlugin(obj, "Mattia Sicuro", "1.0", "Any", &status); CHECK_MSTATUS_AND_RETURN_IT(status);
-	CHECK_MSTATUS_AND_RETURN_IT(fnPlugin.registerNode("locatorNodeVP12", LocatorNodeVP12::typeID, LocatorNodeVP12::creator, LocatorNodeVP12::initialize, MPxNode::kLocatorNode, &LocatorNodeVP12::drawDbClassification));
-	CHECK_MSTATUS_AND_RETURN_IT(MHWRender::MDrawRegistry::registerDrawOverrideCreator(LocatorNodeVP12::drawDbClassification, "locatorNodeVP12", LocatorNodeVP12Override::creator));
+	CHECK_MSTATUS_AND_RETURN_IT(fnPlugin.registerNode("stressMap", StressMap::typeId, StressMap::creator, StressMap::initialize, MPxNode::kLocatorNode, &StressMap::kDrawDbClassification));
+	CHECK_MSTATUS_AND_RETURN_IT(MHWRender::MDrawRegistry::registerDrawOverrideCreator(StressMap::kDrawDbClassification, "stressMap", StressMapOverride::creator));
 	return MS::kSuccess;
 }
 
 MStatus uninitializePlugin(MObject obj)
 {
 	MFnPlugin fnPlugin(obj);
-	CHECK_MSTATUS_AND_RETURN_IT(fnPlugin.deregisterNode(LocatorNodeVP12::typeID));
-	CHECK_MSTATUS_AND_RETURN_IT(MHWRender::MDrawRegistry::deregisterDrawOverrideCreator(LocatorNodeVP12::drawDbClassification, "LocatorNodeVP12"));
+	CHECK_MSTATUS_AND_RETURN_IT(fnPlugin.deregisterNode(StressMap::typeId));
+	CHECK_MSTATUS_AND_RETURN_IT(MHWRender::MDrawRegistry::deregisterDrawOverrideCreator(StressMap::kDrawDbClassification, "StressMap"));
 	return MS::kSuccess;
 }
