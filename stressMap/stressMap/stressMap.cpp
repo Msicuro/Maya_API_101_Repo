@@ -153,3 +153,134 @@ MStatus StressMap::initialize()
 
 	return MS::kSuccess;
 }
+
+bool StressMap::isBounded() const { return false; }
+
+MStatus StressMap::compute(const MPlug& plug, MDataBlock& data)
+{
+	// Check if the meshes are connected
+	MPlug inputMeshP(thisMObject(), inputMesh);
+	if (!inputMeshP.isConnected()) { return MS::kNotImplemented; }
+
+	MPlug referenceMeshP(thisMObject(), referenceMesh);
+	if (!referenceMeshP.isConnected()) { return MS::kNotImplemented; }
+
+	// Gather data
+	MObject referenceMeshV = data.inputValue(referenceMesh).asMesh();
+	MObject inputMeshV = data.inputValue(inputMesh).asMesh();
+	const double multiplierV = data.inputValue(multiplier).asDouble();
+	const double clampItMaxV = data.inputValue(clampMax).asDouble();
+	const bool normalizeV = data.inputValue(normalize).asBool();
+
+	// Build a table for the neighbors of a vertex and cache the mesh topology
+	if ((firstRun == 0) || (pointStoredTree.empty() == 1) || (stressMapValues.length() == 0))
+	{
+		buildConnectionTree(pointStoredTree, stressMapValues, referenceMeshV);
+	}
+
+	// Get input points
+	MFnMesh inMeshFn(inputMeshV);
+	inMeshFn.getPoints(inputPos, MSpace::kObject);
+
+	// Get reference points
+	MFnMesh refMeshFn(referenceMeshV);
+	refMeshFn.getPoints(referencePos, MSpace::kObject);
+
+	const unsigned int intLength = inputPos.length();
+
+	// Check the amount of points on the input mesh
+	if (intLength != referencePos.length())
+	{
+		MGlobal::displayError("Unequal number of points between input mesh and reference mesh");
+		return MS::kSuccess;
+	}
+
+	// Check if the amount of stored points matches the input points
+	if (pointStoredTree.size() != intLength)
+	{
+		MGlobal::displayError("Unequal number of points between reference and main data, try to rebuild");
+		return MS::kSuccess;
+	}
+
+	double value = 0;
+	MVector storedLen, currentLen;
+
+	// Loop through every vertex to calculate the stress data
+	for (int v = 0; v < intLength; v++)
+	{
+		value = 0;
+
+		// Loop through all the vertices connected to the current vertex
+		for (int n = 0; n < pointStoredTree[v].sizes; n++)
+		{
+			// Alias for the neighbor points for readability
+			int connIndex = pointStoredTree[v].neighbors[n];
+			// Get the vectors length
+			storedLen = MVector(referencePos[connIndex] - referencePos[v]);
+			currentLen = MVector(inputPos[connIndex] - inputPos[v]);
+
+			value += (currentLen.length() / storedLen.length());
+		}
+
+		// Average the full value by the number of edges
+		value = value / static_cast<double>(pointStoredTree[v].sizes);
+		// Remap the value from 0-2 to -1-1
+		value -= 1;
+		
+		// Multiply the value by the multiplier
+		value *= multiplierV;
+
+		// Clamp the value
+		if (normalizeV == 1 && value > clampItMaxV) { value = clampItMaxV; }
+
+		stressMapValues[v] = value;
+	}
+
+	// Set the output data
+	MStatus status;
+	MFnDoubleArrayData outputDataFn;
+	MObject outputData = outputDataFn.create(stressMapValues, &status);
+	data.outputValue(output).setMObject(outputData);
+	data.outputValue(output).setClean();
+
+	data.outputValue(fakeOut).set(0);
+	data.outputValue(fakeOut).setClean();
+
+	return MS::kSuccess;
+}
+
+void StressMap::buildConnectionTree(std::vector<StressPoint>& pointTree, MDoubleArray& stressMapValues, MObject& referenceMesh)
+{
+	// Clear the array of stress points and free memory
+	pointTree.clear();
+	// Clear the stress values
+	stressMapValues.clear();
+
+	// Initialize mesh functions 
+	MItMeshVertex iter(referenceMesh);
+	MFnMesh meshFn(referenceMesh);
+	MPointArray points;
+	meshFn.getPoints(points);
+
+	// Resize the stressmap and point tree based on the number of vertices on the mesh
+	int size = points.length();
+	pointTree.resize(size);
+	stressMapValues.setLength(size);
+
+	// Needed variables
+	int oldIndex;
+
+	// Loop through all the points
+	for (unsigned int i = 0; i < points.length(); i++)
+	{
+		StressPoint pnt;
+
+		iter.setIndex(i, oldIndex);
+		MIntArray vertices;
+		iter.getConnectedVertices(vertices);
+		pnt.neighbors = vertices;
+		pnt.sizes = vertices.length();
+		pointTree[i] = pnt;
+		stressMapValues[i] = 0;
+	}
+}
