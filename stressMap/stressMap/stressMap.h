@@ -25,7 +25,7 @@ public:
 
 	StressMap();
 		
-	void draw(M3dView&, const MDagPath&, M3dView::DisplayStyle, M3dView::DisplayStatus) override;
+	void draw(M3dView& view, const MDagPath& path, M3dView::DisplayStyle dispStyle, M3dView::DisplayStatus status) override;
 	bool isBounded() const override;
 
 	void buildConnectionTree(std::vector<StressPoint>& pointTree, MDoubleArray& stressMapValues, MObject& referenceMesh);

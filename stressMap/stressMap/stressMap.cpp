@@ -284,3 +284,141 @@ void StressMap::buildConnectionTree(std::vector<StressPoint>& pointTree, MDouble
 		stressMapValues[i] = 0;
 	}
 }
+
+inline void stressLine(MPoint& point, float stress, const float* squashColor, const float* stretchColor, const float mult)
+{
+	// Check if the stress1 is greater than 0, if so this means it is stretched
+	const float* color = stress > 0 ? stretchColor : squashColor;
+
+	// Clamp the stretch
+	stress = stress > 1.0f ? 1.0f : stress;
+	stress = stress <= 0.95f ? 0.95f : stress;
+
+	// Check whether we got a compression or stretch
+	// If compressed, the value will be negative and will be reversed
+	stress = stress < 0.0f ? -stress : stress;
+
+	// Setting the color and adding the vertex
+	glColor4f(color[0] * stress * mult, color[1] * stress * mult, color[2] * stress * mult, 1.0);
+	glVertex3d(point.x, point.y, point.z);
+}
+
+void StressMap::draw(M3dView& view, const MDagPath& path, M3dView::DisplayStyle dispStyle, M3dView::DisplayStatus status)
+{
+	// Get and use the value of the drawIt attribute
+	MPlug drawItP(thisMObject(), drawIt);
+	bool drawItV;
+	drawItP.getValue(drawItV);
+
+	if (drawItV == 0) { return; }
+
+	// Force the output to evaluate
+	MPlug fakeP(thisMObject(), fakeOut);
+	bool fakeV;
+	fakeP.getValue(fakeV);
+	
+	MPlug outP(thisMObject(), output);
+	MObject outV;
+	outP.getValue(outV);
+
+	// Get the input mesh
+	MPlug inputMeshP(thisMObject(), inputMesh);
+	MObject inputMeshV;
+	inputMeshP.getValue(inputMeshV);
+
+	MFnMesh meshFn(inputMeshV);
+	MPointArray inPoint;
+	meshFn.getPoints(inPoint);
+	MItMeshPolygon faceIt(inputMeshV);
+
+	// Get the colors
+	MPlug squashPlug(thisMObject(), squashColor);
+	MObject squashObj;
+	squashPlug.getValue(squashObj);
+	MFnNumericData numericFn(squashObj);
+
+	float squashColorV[] = { 0, 0, 0, 1 };
+	float stretchColorV[] = { 0, 0, 0, 1 };
+	
+	numericFn.getData(squashColorV[0], squashColorV[1], squashColorV[2]);
+
+	MPlug stretchPlug(thisMObject(), stretchColor);
+	// MObject stretchObj;
+	// stretchPlug.getValue(stretchObj);
+	numericFn.setObject(stretchPlug.asMObject());
+	numericFn.getData(stretchColorV[0], stretchColorV[1], stretchColorV[2]);
+
+	// Color multiplier
+	MPlug intensityP(thisMObject(), intensity);
+	const float intensityVf = intensityP.asFloat();
+
+	if (stressMapValues.length() != inPoint.length()) { return; }
+
+	// Initialize openGL and draw //
+
+	view.beginGL();
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glLineWidth(2);
+	if (status == M3dView::kLead)
+	{
+		glColor4f(0.0, 1.0, 0.0, 1.0f);
+	}
+	else
+	{
+		glColor4f(1.0, 1.0, 0.0, 1.0f);
+	}
+
+	faceIt.reset();
+
+	std::vector<int> edgesDone;
+	int size = meshFn.numEdges();
+	edgesDone.resize(size);
+
+	// Loop through each edge
+	for (int i = 0; i < size; i++)
+	{
+		edgesDone[i] = 0;
+	}
+
+	MIntArray facePoint;
+	MIntArray edges;
+
+	// Start drawing the line
+	glBegin(GL_LINES);
+
+	for (; faceIt.isDone() != 1; faceIt.next())
+	{
+		// Draw the edges and get the vertices
+		faceIt.getEdges(edges);
+		faceIt.getVertices(facePoint);
+
+		// Loop through the edges
+		int length = edges.length();
+
+		for (int e = 0; e < length; e++)
+		{
+			// Check if the edge has been done already
+			int edgeId = edges[e];
+			if (edgesDone[edgeId] == 0)
+			{
+				// Edges should be in the same order as the points
+				// The fist edge will have points with index [0] and [1]
+
+				int vtx1 = facePoint[e];
+				int vtx2 = e != (length - 1) ? facePoint[e + 1] : facePoint[0];
+
+				// Draw the points
+				stressLine(inPoint[vtx1], stressMapValues[vtx1], squashColorV, stretchColorV, intensityVf);
+				stressLine(inPoint[vtx2], stressMapValues[vtx2], squashColorV, stretchColorV, intensityVf);
+
+				// Mark the edge as drawn
+				edgesDone[edges[e]] = 1;
+			}
+		}
+	}
+	glEnd();
+	glDisable(GL_BLEND);
+	glPopAttrib();
+}
