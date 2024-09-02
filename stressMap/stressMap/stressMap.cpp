@@ -79,7 +79,7 @@ MStatus StressMap::initialize()
 	status = numFn.setStorable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = addAttribute(normalize); CHECK_MSTATUS_AND_RETURN_IT(status);
 
-	squashColor = numFn.create("squashColor", "squashColor", &status); CHECK_MSTATUS_AND_RETURN_IT(status);
+	squashColor = numFn.createColor("squashColor", "squashColor", &status); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = numFn.setDefault(0.0f, 1.0f, 0.0f); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = numFn.setKeyable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = numFn.setStorable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
@@ -87,7 +87,7 @@ MStatus StressMap::initialize()
 	status = numFn.setWritable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = addAttribute(squashColor); CHECK_MSTATUS_AND_RETURN_IT(status);
 
-	stretchColor = numFn.create("stretchColor", "stretchColor", &status); CHECK_MSTATUS_AND_RETURN_IT(status);
+	stretchColor = numFn.createColor("stretchColor", "stretchColor", &status); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = numFn.setDefault(1.0f, 0.0f, 0.0f); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = numFn.setKeyable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = numFn.setStorable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
@@ -105,7 +105,7 @@ MStatus StressMap::initialize()
 	status = numFn.setStorable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = addAttribute(fakeOut); CHECK_MSTATUS_AND_RETURN_IT(status);
 
-	output = numFn.create("output", "output", MFnData::kDoubleArray);
+	output = typeFn.create("output", "output", MFnData::kDoubleArray);
 	status = numFn.setKeyable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = numFn.setWritable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = numFn.setStorable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
@@ -355,7 +355,7 @@ void StressMap::draw(M3dView& view, const MDagPath& path, M3dView::DisplayStyle 
 	if (stressMapValues.length() != inPoint.length()) { return; }
 
 	// Initialize openGL and draw //
-
+	
 	view.beginGL();
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 	glEnable(GL_BLEND);

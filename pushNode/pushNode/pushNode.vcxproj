@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{beee8aba-81d3-4863-b196-8ae157d5c397}</ProjectGuid>
-    <RootNamespace>stressMap</RootNamespace>
+    <ProjectGuid>{343daa72-421a-49c8-8129-62c3355e33f6}</ProjectGuid>
+    <RootNamespace>pushNode</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -108,7 +108,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_OPENMAYA_DEPRECATION_DISABLE_WARNING</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Program Files\Autodesk\Maya2022\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -116,7 +116,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Program Files\Autodesk\Maya2022\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Foundation.lib;OpenMaya.lib;OpenGL32.lib;OpenMayaRender.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Foundation.lib;OpenMaya.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -125,7 +125,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_OPENMAYA_DEPRECATION_DISABLE_WARNING</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Program Files\Autodesk\Maya2022\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -135,17 +135,15 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Program Files\Autodesk\Maya2022\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Foundation.lib;OpenMaya.lib;OpenGL32.lib;OpenMayaRender.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Foundation.lib;OpenMaya.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="pluginMain.cpp" />
-    <ClCompile Include="stressMap.cpp" />
-    <ClCompile Include="stressMapOverride.cpp" />
+    <ClCompile Include="pushNode.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="stressMap.h" />
-    <ClInclude Include="stressMapOverride.h" />
+    <ClInclude Include="pushNode.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
