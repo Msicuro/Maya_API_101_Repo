@@ -22,7 +22,7 @@ MTypeId StressMapOverride::typeID(0x90010);
 
 MHWRender::MPxDrawOverride* StressMapOverride::creator(const MObject& obj) { return new StressMapOverride(obj); }
 
-StressMapOverride::StressMapOverride(const MObject& obj) : MHWRender::MPxDrawOverride(obj, StressMapOverride::draw) {}
+StressMapOverride::StressMapOverride(const MObject& obj) : MHWRender::MPxDrawOverride(obj, nullptr) {}
 
 MHWRender::DrawAPI StressMapOverride::supportedDrawAPIs() const { return MHWRender::kAllDevices; }
 

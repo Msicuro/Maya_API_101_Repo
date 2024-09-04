@@ -100,7 +100,7 @@ MStatus StressMap::initialize()
 	status = numFn.setStorable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = addAttribute(intensity); CHECK_MSTATUS_AND_RETURN_IT(status);
 
-	fakeOut = numFn.create("fakeOutput", "fakeOutput", MFnNumericData::kBoolean, 1, &status); CHECK_MSTATUS_AND_RETURN_IT(status);
+	fakeOut = numFn.create("fakeOutput", "fakeOutput", MFnNumericData::kBoolean, 1.0, &status); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = numFn.setKeyable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = numFn.setStorable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = addAttribute(fakeOut); CHECK_MSTATUS_AND_RETURN_IT(status);
@@ -120,19 +120,20 @@ MStatus StressMap::initialize()
 	status = attributeAffects(intensity, output); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = attributeAffects(normalize, output); CHECK_MSTATUS_AND_RETURN_IT(status);
 
-	status = attributeAffects(inputMesh, fakeOut); CHECK_MSTATUS_AND_RETURN_IT(status);
-	status = attributeAffects(referenceMesh, fakeOut); CHECK_MSTATUS_AND_RETURN_IT(status);
-	status = attributeAffects(clampMax, fakeOut); CHECK_MSTATUS_AND_RETURN_IT(status);
-	status = attributeAffects(multiplier, fakeOut); CHECK_MSTATUS_AND_RETURN_IT(status);
-	status = attributeAffects(squashColor, fakeOut); CHECK_MSTATUS_AND_RETURN_IT(status);
-	status = attributeAffects(stretchColor, fakeOut); CHECK_MSTATUS_AND_RETURN_IT(status);
-	status = attributeAffects(intensity, fakeOut); CHECK_MSTATUS_AND_RETURN_IT(status);
-	status = attributeAffects(normalize, fakeOut); CHECK_MSTATUS_AND_RETURN_IT(status);
+	//status = attributeAffects(inputMesh, fakeOut); CHECK_MSTATUS_AND_RETURN_IT(status);
+	//status = attributeAffects(referenceMesh, fakeOut); CHECK_MSTATUS_AND_RETURN_IT(status);
+	//status = attributeAffects(clampMax, fakeOut); CHECK_MSTATUS_AND_RETURN_IT(status);
+	//status = attributeAffects(multiplier, fakeOut); CHECK_MSTATUS_AND_RETURN_IT(status);
+	//status = attributeAffects(squashColor, fakeOut); CHECK_MSTATUS_AND_RETURN_IT(status);
+	//status = attributeAffects(stretchColor, fakeOut); CHECK_MSTATUS_AND_RETURN_IT(status);
+	//status = attributeAffects(intensity, fakeOut); CHECK_MSTATUS_AND_RETURN_IT(status);
+	//status = attributeAffects(normalize, fakeOut); CHECK_MSTATUS_AND_RETURN_IT(status);
 
 	// Attribute Editor template
 	MString stresTemplateNode(
-		MString() + "global proc AEstressMapTemplate(string &nodeName) \n" +
+		MString() + "global proc AEstressMapTemplate(string $nodeName) \n" +
 		"{editorTemplate -beginScrollLayout; \n" +
+
 		"editorTemplate -beginLayout \"Setting Attributes\" -collapse 0; \n" +
 		"editorTemplate -addControl \"normalize\"; \n" +
 		"editorTemplate -addControl \"clampMax\"; \n" +
@@ -147,7 +148,7 @@ MStatus StressMap::initialize()
 		"editorTemplate -endLayout; \n" +
 
 		"editorTemplate -addExtraControls; \n" +
-		"editorTemplate -endScrollLayout; \n");
+		"editorTemplate -endScrollLayout;} \n");
 
 	MGlobal::executeCommand(stresTemplateNode);
 

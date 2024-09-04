@@ -2,6 +2,7 @@
 
 #pragma comment(lib, "opengl32.lib")
 #pragma comment(lib, "OpenMayaRender.lib")
+#pragma comment(lib, "OpenMayaUI.lib")
 
 #include <maya/MDrawRegistry.h>
 #include <maya/MFnPlugin.h>
