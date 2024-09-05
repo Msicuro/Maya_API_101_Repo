@@ -100,15 +100,16 @@ MStatus StressMap::initialize()
 	status = numFn.setStorable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = addAttribute(intensity); CHECK_MSTATUS_AND_RETURN_IT(status);
 
-	fakeOut = numFn.create("fakeOutput", "fakeOutput", MFnNumericData::kBoolean, 1.0, &status); CHECK_MSTATUS_AND_RETURN_IT(status);
-	status = numFn.setKeyable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
-	status = numFn.setStorable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
+	fakeOut = numFn.create("fakeOutput", "fakeOutput", MFnNumericData::kBoolean, 1, &status); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = numFn.setKeyable(false); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = numFn.setWritable(false); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = numFn.setStorable(false); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = addAttribute(fakeOut); CHECK_MSTATUS_AND_RETURN_IT(status);
 
 	output = typeFn.create("output", "output", MFnData::kDoubleArray);
-	status = numFn.setKeyable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
-	status = numFn.setWritable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
-	status = numFn.setStorable(true); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = typeFn.setKeyable(false); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = typeFn.setWritable(false); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = typeFn.setStorable(false); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = addAttribute(output); CHECK_MSTATUS_AND_RETURN_IT(status);
 
 	status = attributeAffects(inputMesh, output); CHECK_MSTATUS_AND_RETURN_IT(status);
@@ -120,14 +121,14 @@ MStatus StressMap::initialize()
 	status = attributeAffects(intensity, output); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = attributeAffects(normalize, output); CHECK_MSTATUS_AND_RETURN_IT(status);
 
-	//status = attributeAffects(inputMesh, fakeOut); CHECK_MSTATUS_AND_RETURN_IT(status);
-	//status = attributeAffects(referenceMesh, fakeOut); CHECK_MSTATUS_AND_RETURN_IT(status);
-	//status = attributeAffects(clampMax, fakeOut); CHECK_MSTATUS_AND_RETURN_IT(status);
-	//status = attributeAffects(multiplier, fakeOut); CHECK_MSTATUS_AND_RETURN_IT(status);
-	//status = attributeAffects(squashColor, fakeOut); CHECK_MSTATUS_AND_RETURN_IT(status);
-	//status = attributeAffects(stretchColor, fakeOut); CHECK_MSTATUS_AND_RETURN_IT(status);
-	//status = attributeAffects(intensity, fakeOut); CHECK_MSTATUS_AND_RETURN_IT(status);
-	//status = attributeAffects(normalize, fakeOut); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(inputMesh, fakeOut); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(referenceMesh, fakeOut); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(clampMax, fakeOut); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(multiplier, fakeOut); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(squashColor, fakeOut); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(stretchColor, fakeOut); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(intensity, fakeOut); CHECK_MSTATUS_AND_RETURN_IT(status);
+	status = attributeAffects(normalize, fakeOut); CHECK_MSTATUS_AND_RETURN_IT(status);
 
 	// Attribute Editor template
 	MString stresTemplateNode(
