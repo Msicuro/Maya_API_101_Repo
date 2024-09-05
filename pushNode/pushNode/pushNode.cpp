@@ -13,6 +13,8 @@
 #include <maya/MPlug.h>
 #include <set>
 
+#include <maya/MPxDeformerNode.h>
+
 
 #define SMALL (float)1e-6
 #define BIG_DIST 99999
@@ -111,3 +113,4 @@ MStatus PushNode::deform(MDataBlock& data, MItGeometry& iter, const MMatrix& mat
 
 	return MStatus::kSuccess;
 }
+
