@@ -9,7 +9,7 @@ MStatus initializePlugin(MObject obj)
 	MFnPlugin fnPlugin(obj, "Mattia", "1.0", "Any", &status); CHECK_MSTATUS_AND_RETURN_IT(status);
 	CHECK_MSTATUS_AND_RETURN_IT(fnPlugin.registerNode("snapDeformer", SnapDeformer::typeId, SnapDeformer::creator, SnapDeformer::initialize, MPxNode::kDeformerNode));
 
-	MS::kSuccess;
+	return MS::kSuccess;
 }
 
 MStatus uninitializePlugin(MObject obj)
