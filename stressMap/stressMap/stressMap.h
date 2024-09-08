@@ -28,7 +28,7 @@ public:
 	void draw(M3dView& view, const MDagPath& path, M3dView::DisplayStyle dispStyle, M3dView::DisplayStatus status) override;
 	bool isBounded() const override;
 
-	void buildConnectionTree(std::vector<StressPoint>& pointTree, MDoubleArray& stressMapValues, MObject& referenceMesh);
+	MStatus buildConnectionTree(MDataBlock& data, MObject& inputMeshV);
 
 	// Variables
 public:
@@ -37,9 +37,15 @@ public:
 	static MObject drawIt;
 	static MObject inputMesh;
 	static MObject referenceMesh;
-	std::vector<StressPoint> pointStoredTree;
+	// std::vector<StressPoint> pointStoredTree;
+
+	MIntArray vertexNeighborCounts;
+	MIntArray vertexNeighbors;
+	MDoubleArray vertexEdgeLengths;
 
 	MDoubleArray stressMapValues;
+	MPointArray inputPos;
+
 	static const MString kDrawDbClassification;
 	static MObject output;
 	static MObject multiplier;
@@ -49,7 +55,6 @@ public:
 	static MObject stretchColor;
 	static MObject intensity;
 
-	int firstRun;
-	MPointArray referencePos;
-	MPointArray inputPos;
+	// int firstRun;
+	// MPointArray referencePos;
 };

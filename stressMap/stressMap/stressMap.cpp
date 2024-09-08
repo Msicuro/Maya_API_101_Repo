@@ -34,7 +34,7 @@ MObject StressMap::stretchColor;
 MObject StressMap::intensity;
 
 // NOTE: Read more about member initializer lists (using the colon with a constructor definition)
-StressMap::StressMap() : firstRun(0) {}
+StressMap::StressMap(){}
 
 void* StressMap::creator() { return new StressMap(); }
 
@@ -168,74 +168,62 @@ MStatus StressMap::compute(const MPlug& plug, MDataBlock& data)
 	if (!referenceMeshP.isConnected()) { return MS::kNotImplemented; }
 
 	// Gather data
-	MObject referenceMeshV = data.inputValue(referenceMesh).asMesh();
 	MObject inputMeshV = data.inputValue(inputMesh).asMesh();
 	const double multiplierV = data.inputValue(multiplier).asDouble();
 	const double clampItMaxV = data.inputValue(clampMax).asDouble();
 	const bool normalizeV = data.inputValue(normalize).asBool();
 
-	// Build a table for the neighbors of a vertex and cache the mesh topology
-	if ((firstRun == 0) || (pointStoredTree.empty() == 1) || (stressMapValues.length() == 0))
-	{
-		buildConnectionTree(pointStoredTree, stressMapValues, referenceMeshV);
-	}
-
 	// Get input points
 	MFnMesh inMeshFn(inputMeshV);
 	inMeshFn.getPoints(inputPos, MSpace::kObject);
 
-	// Get reference points
-	MFnMesh refMeshFn(referenceMeshV);
-	refMeshFn.getPoints(referencePos, MSpace::kObject);
-
-	const unsigned int intLength = inputPos.length();
-
-	// Check the amount of points on the input mesh
-	if (intLength != referencePos.length())
-	{
-		MGlobal::displayError("Unequal number of points between input mesh and reference mesh");
-		return MS::kSuccess;
-	}
-
 	// Check if the amount of stored points matches the input points
-	if (pointStoredTree.size() != intLength)
+	if (vertexNeighborCounts.length() != inputPos.length())
 	{
-		MGlobal::displayError("Unequal number of points between reference and main data, try to rebuild");
-		return MS::kSuccess;
+		if (buildConnectionTree(data, inputMeshV) != MS::kSuccess)
+		{
+			return MS::kFailure;
+		}
 	}
 
 	double value = 0;
 	MVector storedLen, currentLen;
 
 	// Loop through every vertex to calculate the stress data
-	for (int v = 0; v < intLength; v++)
+	for (int v = 0; v < inputPos.length(); v++)
 	{
 		value = 0;
 
 		// Loop through all the vertices connected to the current vertex
-		for (int n = 0; n < pointStoredTree[v].sizes; n++)
+		int cursor = 0;
+
+		for (int n = 0; n < inputPos.length(); n++)
 		{
-			// Alias for the neighbor points for readability
-			int connIndex = pointStoredTree[v].neighbors[n];
-			// Get the vectors length
-			storedLen = MVector(referencePos[connIndex] - referencePos[v]);
-			currentLen = MVector(inputPos[connIndex] - inputPos[v]);
+			int numNeighbors = vertexNeighborCounts[n];
+			MPoint lhs = inputPos[n];
+			double value = 0.0;
 
-			value += (currentLen.length() / storedLen.length());
-		}
+			unsigned int end = cursor + numNeighbors;
+			for (; cursor < end; cursor++)
+			{
+				int neighbor = vertexNeighbors[cursor];
+				MPoint rhs = inputPos[neighbor];
 
-		// Average the full value by the number of edges
-		value = value / static_cast<double>(pointStoredTree[v].sizes);
-		// Remap the value from 0-2 to -1-1
-		value -= 1;
+				double referenceLength = vertexEdgeLengths[cursor];
+				value += lhs.distanceTo(rhs) / referenceLength;
+			}
 		
-		// Multiply the value by the multiplier
-		value *= multiplierV;
-
-		// Clamp the value
-		if (normalizeV == 1 && value > clampItMaxV) { value = clampItMaxV; }
-
-		stressMapValues[v] = value;
+			// Average the full value by the number of edges
+			value /= static_cast<double>(numNeighbors);
+			// Remap the value from 0-2 to -1-1
+			value -= 1;
+			// Multiply the value by the multiplier
+			value *= multiplierV;
+			// Clamp the value
+			if (normalizeV == 1 && value > clampItMaxV) { value = clampItMaxV; }
+			
+			stressMapValues[v] = value;
+		}
 	}
 
 	// Set the output data
@@ -251,40 +239,46 @@ MStatus StressMap::compute(const MPlug& plug, MDataBlock& data)
 	return MS::kSuccess;
 }
 
-void StressMap::buildConnectionTree(std::vector<StressPoint>& pointTree, MDoubleArray& stressMapValues, MObject& referenceMesh)
+MStatus StressMap::buildConnectionTree(MDataBlock& data, MObject& inputMeshV)
 {
-	// Clear the array of stress points and free memory
-	pointTree.clear();
-	// Clear the stress values
-	stressMapValues.clear();
+	MObject referenceMeshV = data.inputValue(referenceMesh).asMesh();
 
-	// Initialize mesh functions 
-	MItMeshVertex iter(referenceMesh);
-	MFnMesh meshFn(referenceMesh);
-	MPointArray points;
-	meshFn.getPoints(points);
+	// Get reference points
+	MFnMesh refMeshFn(referenceMeshV);
+	MPointArray referencePos;
+	refMeshFn.getPoints(referencePos, MSpace::kObject);
 
-	// Resize the stressmap and point tree based on the number of vertices on the mesh
-	int size = points.length();
-	pointTree.resize(size);
-	stressMapValues.setLength(size);
-
-	// Needed variables
-	int oldIndex;
-
-	// Loop through all the points
-	for (unsigned int i = 0; i < points.length(); i++)
+	// Check the amount of points on the input mesh
+	if (inputPos.length() != referencePos.length())
 	{
-		StressPoint pnt;
-
-		iter.setIndex(i, oldIndex);
-		MIntArray vertices;
-		iter.getConnectedVertices(vertices);
-		pnt.neighbors = vertices;
-		pnt.sizes = vertices.length();
-		pointTree[i] = pnt;
-		stressMapValues[i] = 0;
+		MGlobal::displayError("Unequal number of points between input mesh and reference mesh");
+		return MS::kFailure;
 	}
+
+	stressMapValues.setLength(inputPos.length());
+	vertexNeighborCounts.setLength(inputPos.length());
+	
+	MItMeshVertex iter(inputMeshV);
+	for (; !iter.isDone(); iter.next())
+	{
+		MIntArray neighbors;
+		iter.getConnectedVertices(neighbors);
+		vertexNeighborCounts[iter.index()] = neighbors.length();
+		// Left Hand Side
+		MPoint lhs = referencePos[iter.index()];
+
+		for (int i = 0; i < neighbors.length(); i++)
+		{
+			vertexNeighbors.append(neighbors[i]);
+			// Right Hamd Sides
+			MPoint rhs = referencePos[neighbors[i]];
+			vertexEdgeLengths.append(lhs.distanceTo(rhs));
+		}
+
+		stressMapValues[iter.next()] = 0.0;
+	}
+
+	return MS::kSuccess;
 }
 
 inline void stressLine(MPoint& point, float stress, const float* squashColor, const float* stretchColor, const float mult)
