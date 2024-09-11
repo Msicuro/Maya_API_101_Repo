@@ -16,6 +16,7 @@
 #include <maya/MFnUnitAttribute.h>
 #include <maya/MFnEnumAttribute.h>
 #include <maya/MFnCompoundAttribute.h>
+#include <maya/MDoubleArray.h>
 
 #include <string>
 
@@ -195,6 +196,164 @@ MStatus ChainOnPath::initialize()
 
 	status = attributeAffects(paramAs, outputTranslate); CHECK_MSTATUS_AND_RETURN_IT(status);
 	status = attributeAffects(paramAs, outputRotate); CHECK_MSTATUS_AND_RETURN_IT(status);
+
+	return MS::kSuccess;
+}
+
+MStatus ChainOnPath::compute(const MPlug& plug, MDataBlock& block)
+{
+	if ((plug == outputTranslate) || (plug == outputRotate))
+	{
+		int numOfOutputsValue = block.inputValue(numOfOutputs).asInt();
+
+		// Check if there's a curve and surface connected
+		MPlug inCurvePlug(thisMObject(), inCurve);
+		if (!inCurvePlug.isConnected())
+		{
+			return MS::kNotImplemented;
+		}
+
+		MPlug inSurfacePlug(thisMObject(), inSurface);
+		if (!inSurfacePlug.isConnected())
+		{
+			return MS::kNotImplemented;
+		}
+
+		// Cache param values
+		if (initParams == 0)
+		{
+			MArrayDataHandle paramsH = block.inputArrayValue(paramValues);
+			paramsV = paramsH.elementCount();
+			inParams = MDoubleArray(paramsV, 0);
+
+			if (paramsV != numOfOutputsValue)
+			{
+				return MS::kNotImplemented;
+			}
+
+			paramsH.jumpToArrayElement(0);
+			for (int i = 0; i < numOfOutputsValue; i++, paramsH.next())
+			{
+				inParams[i] = paramsH.inputValue().asDouble();
+			}
+
+			initParams = 1;
+		}
+
+		// Cache the curve
+		if (initCurve == 0)
+		{
+			inCurveV = block.inputValue(inCurve).asNurbsCurve();
+			curveFn.setObject(inCurveV);
+			curveLen = curveFn.length();
+			defaultCurveLengthV = block.inputValue(defaultCurveLength).asDouble();
+			ratio = curveLen / defaultCurveLengthV;
+
+			initCurve = 1;
+		}
+
+		// Cache the surface
+		if (initSurface == 0)
+		{
+			inSurfaceV = block.inputValue(inSurface).asNurbsSurface();
+			surfaceFn.setObject(inSurfaceV);
+			surfaceFn.getKnotDomain(uMin, uMax, vMin, vMax);
+
+			initSurface = 1;
+		}
+
+		// Get needed handles
+		MArrayDataHandle outputRotateH = block.outputArrayValue(outputRotate);
+		MArrayDataHandle outputTranslateH = block.outputArrayValue(outputTranslate);
+
+		int paramAsV = block.inputValue(paramAs).asShort();
+		int outTV = outputRotateH.elementCount();
+		int outRV = outputTranslateH.elementCount();
+		double stretchToFitV = block.inputValue(stretchToFitLength).asDouble();
+		double reverseRootV = block.inputValue(reverseRoot).asDouble();
+
+		// Extra checks
+		if (defaultCurveLengthV < 0.0001)
+		{
+			return MS::kNotImplemented;
+		}
+		if (paramsV != numOfOutputsValue || outTV != numOfOutputsValue || outRV != numOfOutputsValue)
+		{
+			return MS::kNotImplemented;
+		}
+
+		outputTranslateH.jumpToArrayElement(0);
+		outputRotateH.jumpToArrayElement(0);
+		for (int i = 0; i < numOfOutputsValue; i++, outputRotateH.next(), outputTranslateH.next())
+		{
+			// Remap the values
+			reversed = defaultCurveLengthV - inParams[i];
+
+			// Normal param stretched
+			inParamStretched = (inParams[i] * ratio * stretchToFitV) + (inParams[i] * (1.0 - stretchToFitV));
+
+			// Reversed param stretched
+			inParamReversed = curveLen - ((reversed * ratio * stretchToFitV) + (reversed * (1.0 - stretchToFitV)));
+
+			// Blend the results
+			finalParam = (inParamReversed * reverseRootV) + (inParamStretched * (1 - reverseRootV));
+
+			// Get the final U value from the computed length
+			uVal = curveFn.findParamFromLength(finalParam);
+			// Extract a point
+			curveFn.getPointAtParam(uVal, outP, MSpace::kWorld);
+
+			// Build the matrix out of normals and tangent
+			tan = curveFn.tangent(uVal).normal();
+			normal = surfaceFn.normal(uVal, vMax / 2.0).normal();
+			cross = (tan ^ normal);
+
+			double myMatrix[4][4] = { {tan.x, tan.y, tan.z, 0}, {normal.x, normal.y, normal.z, 0}, {cross.x, cross.y, cross.z, 0} };
+
+			rotMatrix = MMatrix(myMatrix);
+			matrixFn = MTransformationMatrix(rotMatrix);
+			matrixFn.getRotation(outR, rotOrder, MSpace::kObject);
+
+			// Set output translation and rotation
+			outputTranslateH.outputValue().setMVector(outP);
+			outputRotateH.outputValue().set(outR[0], outR[1], outR[2]);
+		}
+
+		outputTranslateH.setAllClean();
+		outputRotateH.setAllClean();
+	}
+
+	return MS::kSuccess;
+}
+
+MStatus ChainOnPath::shouldSave(const MPlug& plug, bool& result)
+{
+	MStatus status = MS::kSuccess;
+	result = true;
+	return status;
+}
+
+MStatus ChainOnPath::setDependentsDirty(const MPlug& plug, MPlugArray& plugArray)
+{
+	std::string str(plug.name().asChar());
+
+	size_t found = str.find(std::string(".param"));
+	if (found != std::string::npos)
+	{
+		initParams = 0;
+	}
+
+	found = str.find(std::string(".inCurve"));
+	if (found != std::string::npos)
+	{
+		initCurve = 0;
+	}
+
+	found = str.find(std::string(".inSurface"));
+	if (found != std::string::npos)
+	{
+		initSurface = 0;
+	}
 
 	return MS::kSuccess;
 }
