@@ -312,7 +312,8 @@ MStatus ChainOnPath::compute(const MPlug& plug, MDataBlock& block)
 
 			rotMatrix = MMatrix(myMatrix);
 			matrixFn = MTransformationMatrix(rotMatrix);
-			matrixFn.getRotation(outR, rotOrder, MSpace::kObject);
+			// matrixFn.getRotation(outR, rotOrder, MSpace::kObject); Causes an error saying "Use the other MTransformationMatrix::getRotation method instead
+			matrixFn.getRotation(outR, rotOrder);
 
 			// Set output translation and rotation
 			outputTranslateH.outputValue().setMVector(outP);
